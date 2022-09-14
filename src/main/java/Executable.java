@@ -1,13 +1,21 @@
+import com.google.gson.Gson;
+import org.jgroups.*;
+import org.jgroups.blocks.cs.ReceiverAdapter;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Random;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Arrays;
+import java.util.Random;
 
 public class Executable {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         String masterKey = generateHex(1);
         int idr = 1; // TODO: to be replaced by IDs from file
@@ -29,12 +37,28 @@ public class Executable {
         String userKey = hash(driverKey.concat(hatu),"SHA-1");
         userKey= userKey.substring(0, 16);
 
+        AppParameters appParameters = new AppParameters();
+        ObuParameters obuParameters = new ObuParameters();
+
+        appParameters.setATU(ATU);
+        appParameters.setUserKey(userKey);
+        appParameters.setHatu(hatu);
+
+        obuParameters.setIdr(idr);
+        obuParameters.setDriverKey(driverKey);
+
+        var gson = new Gson();
+        var appParametersJson = gson.toJson(appParameters);
+        var obuParametersJson = gson.toJson(obuParameters);
+
         System.out.println("Master key KM: " + masterKey);
         System.out.println("IDr: " + idr);
         System.out.println("Driver key KR: " + driverKey);
         System.out.println("ATU: " + s);
         System.out.println("HATU: " + hatu);
         System.out.println("User key KU: " + userKey);
+        System.out.println(appParametersJson);
+        System.out.println(obuParametersJson);
     }
 
     public static String generateHex(int option) {
