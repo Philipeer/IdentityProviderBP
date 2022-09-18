@@ -6,8 +6,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -15,6 +21,7 @@ import java.util.Date;
 import java.util.Random;
 
 public class Executable {
+    public static final int PORT = 3191;
     public static void main(String[] args) throws Exception {
 
         String masterKey = generateHex(1);
@@ -47,6 +54,7 @@ public class Executable {
         obuParameters.setIdr(idr);
         obuParameters.setDriverKey(driverKey);
 
+        ///Jsonig
         var gson = new Gson();
         var appParametersJson = gson.toJson(appParameters);
         var obuParametersJson = gson.toJson(obuParameters);
@@ -59,6 +67,28 @@ public class Executable {
         System.out.println("User key KU: " + userKey);
         System.out.println(appParametersJson);
         System.out.println(obuParametersJson);
+
+        //// Sockets
+        ServerSocket serverSocket = new ServerSocket(PORT);
+        System.out.println("Server is up and running on port: " + PORT);
+        Socket socket = serverSocket.accept();
+
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+        ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+
+        AppParameters recAppParams = (AppParameters) objectInputStream.readObject();
+        System.out.println(recAppParams.message);
+
+        if (recAppParams.message.equals("Hello from App!")){
+            appParameters.message = "Hi! - from the server!";
+            objectOutputStream.writeObject(appParameters);
+        }
+        else if (recAppParams.message.equals("Hello from OBU!")){
+            obuParameters.message = "Hi! - from the server!";
+            objectOutputStream.writeObject(obuParameters);
+        }
+
+        serverSocket.close();
     }
 
     public static String generateHex(int option) {

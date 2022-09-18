@@ -1,7 +1,16 @@
-public class AppParameters {
-    String userKey;
-    byte[] ATU;
-    String hatu;
+import java.io.Serializable;
+
+public class AppParameters implements Serializable {
+    public String message;
+    private String userKey;
+    private byte[] ATU;
+    private String hatu;
+
+    public AppParameters() {
+    }
+    public AppParameters(String message) {
+        this.message = message;
+    }
 
     public String getUserKey() {
         return userKey;

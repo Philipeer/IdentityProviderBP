@@ -1,6 +1,14 @@
 public class ObuParameters {
-    String driverKey;
-    int idr;
+    public String message;
+    private String driverKey;
+    private int idr;
+
+    public ObuParameters() {
+    }
+
+    public ObuParameters(String message) {
+        this.message = message;
+    }
 
     public String getDriverKey() {
         return driverKey;
