@@ -1,3 +1,5 @@
+package com.example.doprava_bp;
+
 import java.io.Serializable;
 
 public class AppParameters implements Serializable {

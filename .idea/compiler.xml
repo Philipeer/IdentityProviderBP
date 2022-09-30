@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="Identity Provider BP" />
+        <module name="Identity_Provider_BP" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="Identity Provider BP" target="18" />
+      <module name="Identity_Provider_BP" target="18" />
     </bytecodeTargetLevel>
   </component>
 </project>

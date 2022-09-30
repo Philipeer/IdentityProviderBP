@@ -1,19 +1,12 @@
-import com.google.gson.Gson;
-import org.jgroups.*;
-import org.jgroups.blocks.cs.ReceiverAdapter;
+package com.example.doprava_bp;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
+import com.google.gson.Gson;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -21,7 +14,7 @@ import java.util.Date;
 import java.util.Random;
 
 public class Executable {
-    public static final int PORT = 3191;
+    public static final int PORT = 10001;
     public static void main(String[] args) throws Exception {
 
         String masterKey = generateHex(1);
@@ -41,6 +34,7 @@ public class Executable {
         fillAtu(ATU,userID,vehicleID,it,noe,formatter,today);
         String s = new String(ATU);
         String hatu = hash(s,"SHA-256");
+        hatu = hatu.substring(0,16);
         String userKey = hash(driverKey.concat(hatu),"SHA-1");
         userKey= userKey.substring(0, 16);
 
@@ -70,13 +64,14 @@ public class Executable {
 
         //// Sockets
         ServerSocket serverSocket = new ServerSocket(PORT);
-        System.out.println("Server is up and running on port: " + PORT);
+        System.out.println("Server is up and running on ip " + serverSocket.getInetAddress().getLocalHost().getHostAddress() + " port: " + PORT);
         Socket socket = serverSocket.accept();
 
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
 
         AppParameters recAppParams = (AppParameters) objectInputStream.readObject();
+        //ObuParameters recAppParams = (ObuParameters) objectInputStream.readObject();
         System.out.println(recAppParams.message);
 
         if (recAppParams.message.equals("Hello from App!")){

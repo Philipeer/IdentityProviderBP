@@ -1,4 +1,8 @@
-public class ObuParameters {
+package com.example.doprava_bp;
+
+import java.io.Serializable;
+
+public class ObuParameters implements Serializable {
     public String message;
     private String driverKey;
     private int idr;
