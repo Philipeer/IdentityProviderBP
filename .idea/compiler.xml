@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="Identity_Provider_BP" target="18" />
+      <module name="Identity_Provider_BP" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

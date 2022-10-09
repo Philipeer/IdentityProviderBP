@@ -49,9 +49,9 @@ public class Executable {
         obuParameters.setDriverKey(driverKey);
 
         ///Jsonig
-        var gson = new Gson();
-        var appParametersJson = gson.toJson(appParameters);
-        var obuParametersJson = gson.toJson(obuParameters);
+        //var gson = new Gson();
+        //var appParametersJson = gson.toJson(appParameters);
+        //var obuParametersJson = gson.toJson(obuParameters);
 
         System.out.println("Master key KM: " + masterKey);
         System.out.println("IDr: " + idr);
@@ -59,31 +59,46 @@ public class Executable {
         System.out.println("ATU: " + s);
         System.out.println("HATU: " + hatu);
         System.out.println("User key KU: " + userKey);
-        System.out.println(appParametersJson);
-        System.out.println(obuParametersJson);
+        //System.out.println(appParametersJson);
+        //System.out.println(obuParametersJson);
 
         //// Sockets
-        ServerSocket serverSocket = new ServerSocket(PORT);
-        System.out.println("Server is up and running on ip " + serverSocket.getInetAddress().getLocalHost().getHostAddress() + " port: " + PORT);
-        Socket socket = serverSocket.accept();
+        for(int i = 0;i<=1;i++) {
+            ServerSocket serverSocket = new ServerSocket(PORT);
+            System.out.println("Server is up and running on ip " + serverSocket.getInetAddress().getLocalHost().getHostAddress() + " port: " + PORT);
+            Socket socket = serverSocket.accept();
 
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-        ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
 
-        AppParameters recAppParams = (AppParameters) objectInputStream.readObject();
-        //ObuParameters recAppParams = (ObuParameters) objectInputStream.readObject();
-        System.out.println(recAppParams.message);
+            switch (i) {
 
-        if (recAppParams.message.equals("Hello from App!")){
-            appParameters.message = "Hi! - from the server!";
-            objectOutputStream.writeObject(appParameters);
+                case 0:
+
+                ObuParameters recObuParams = (ObuParameters) objectInputStream.readObject();
+                System.out.println(recObuParams.message);
+
+                if (recObuParams.message.equals("Hello from OBU!")) {
+                    obuParameters.message = "Hi! - from the server!";
+                    objectOutputStream.writeObject(obuParameters);
+                }
+                    serverSocket.close();
+                break;
+                case 1:
+
+                AppParameters recAppParams = (AppParameters) objectInputStream.readObject();
+                System.out.println(recAppParams.message);
+
+                if (recAppParams.message.equals("Hello from App!")) {
+                    appParameters.message = "Hi! - from the server!";
+                    objectOutputStream.writeObject(appParameters);
+                }
+                    serverSocket.close();
+                break;
+
+                //serverSocket.close();
+            }
         }
-        else if (recAppParams.message.equals("Hello from OBU!")){
-            obuParameters.message = "Hi! - from the server!";
-            objectOutputStream.writeObject(obuParameters);
-        }
-
-        serverSocket.close();
     }
 
     public static String generateHex(int option) {
