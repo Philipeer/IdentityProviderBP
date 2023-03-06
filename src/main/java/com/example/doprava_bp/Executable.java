@@ -2,8 +2,7 @@ package com.example.doprava_bp;
 
 import com.google.gson.Gson;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -15,13 +14,42 @@ import java.util.Random;
 
 public class Executable {
     public static final int PORT = 10001;
+    public static int keyLenghts = 256;
     public static void main(String[] args) throws Exception {
 
-        String masterKey = generateHex(1);
-        int idr = 1; // TODO: to be replaced by IDs from file
+
+        //System.out.println("Pokus: " + generateHex(7));
+        //System.out.println("Pokus hash: " + hash("1","SHA-256"));
+
+
+        /*String masterKey = generateHex((keyLenghts / 32) - 1);
+        try (FileWriter writer = new FileWriter("masterkey.txt")) {
+            writer.write(masterKey);
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to the file: " + e.getMessage());
+        }*/
+
+        StringBuilder data = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader("masterkey.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                data.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading from the file: " + e.getMessage());
+        }
+        String masterKey = data.toString();
+
+        int idr = 1;
         String idrString = Integer.toString(idr);
-        String driverKey = hash(masterKey.concat(idrString),"SHA-1");
-        driverKey = driverKey.substring(0, 16);
+        String driverKey = hash(masterKey.concat(idrString), "SHA-1");
+        if(keyLenghts == 128) {
+            driverKey = hash(masterKey.concat(idrString), "SHA-1");
+        }
+        else if(keyLenghts == 256){
+            driverKey = hash(masterKey.concat(idrString), "SHA-256");
+        }
+        driverKey = driverKey.substring(0, (keyLenghts/4));
         byte[] ATU = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
         String userID = "00000001";
         String vehicleID = "00000001";
@@ -34,9 +62,21 @@ public class Executable {
         fillAtu(ATU,userID,vehicleID,it,noe,formatter,today);
         String s = new String(ATU);
         String hatu = hash(s,"SHA-256");
-        hatu = hatu.substring(0,16);
+        if(keyLenghts == 128){
+            hatu = hash(s,"SHA-256");
+        }
+        else if(keyLenghts == 256){
+            hatu = hash(s,"SHA-512");
+        }
+        hatu = hatu.substring(0,(keyLenghts/4));
         String userKey = hash(driverKey.concat(hatu),"SHA-1");
-        userKey= userKey.substring(0, 16);
+        if(keyLenghts == 128){
+            userKey = hash(driverKey.concat(hatu),"SHA-1");
+        }
+        else if(keyLenghts == 256){
+            userKey = hash(driverKey.concat(hatu),"SHA-256");
+        }
+        userKey= userKey.substring(0, (keyLenghts/4));
 
         AppParameters appParameters = new AppParameters();
         ObuParameters obuParameters = new ObuParameters();
@@ -44,9 +84,11 @@ public class Executable {
         appParameters.setATU(ATU);
         appParameters.setUserKey(userKey);
         appParameters.setHatu(hatu);
+        appParameters.setKeyLengths(keyLenghts);
 
         obuParameters.setIdr(idr);
         obuParameters.setDriverKey(driverKey);
+        obuParameters.setKeyLengths(keyLenghts);
 
         ///Jsonig
         //var gson = new Gson();
@@ -102,6 +144,12 @@ public class Executable {
     }
 
     public static String generateHex(int option) {
+        //option 3 = 128 bit key
+        //option -- = 192 bit key
+        //option 7 = 256 bit key
+        //B374A26A71490437AA024E4FADD5B497FDFF1A8EA6FF12F6FB65AF2720B59CCF
+        //1a2b3c4d5e6f7f8a9b0c1d2e3f4a5b67
+        //GWS3eDKYYoaZISBxbUINjvhreiiYHSAg
         String hexadecimal = "";
 
         // Random instance
