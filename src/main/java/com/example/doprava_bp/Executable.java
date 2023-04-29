@@ -18,27 +18,53 @@ public class Executable {
     public static void main(String[] args) throws Exception {
 
 
+        String userID = "00000001";
+        String vehicleID = "00000001";
+        char it = 'S';
+        int noe = 50;
         //System.out.println("Pokus: " + generateHex(7));
         //System.out.println("Pokus hash: " + hash("1","SHA-256"));
 
 
-        /*String masterKey = generateHex((keyLenghts / 32) - 1);
+        String masterKey = generateHex((keyLenghts / 32) - 1);
         try (FileWriter writer = new FileWriter("masterkey.txt")) {
             writer.write(masterKey);
         } catch (IOException e) {
             System.out.println("An error occurred while writing to the file: " + e.getMessage());
-        }*/
+        }
 
-        StringBuilder data = new StringBuilder();
+        /*
+        //StringBuilder data = new StringBuilder();
+        String masterKey = null;
         try (BufferedReader reader = new BufferedReader(new FileReader("masterkey.txt"))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                data.append(line).append("\n");
+            String[] data = reader.readLine().split("\\s+"); // Use "\\s+" as delimiter for multiple spaces
+            if (data.length >= 5) { // Check if there are enough elements in the data array
+                masterKey = data[0];
+                userID = data[1];
+                vehicleID = data[2];
+                it = data[3].charAt(0);
+                noe = Integer.parseInt(data[4]);
+            } else {
+                // Handle case where data array does not have enough elements
+                System.out.println("Not enough data elements in the file.");
             }
         } catch (IOException e) {
             System.out.println("An error occurred while reading from the file: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("Failed to parse integer from data[4]: " + e.getMessage());
         }
-        String masterKey = data.toString();
+
+        //String masterKey = data.toString();
+        if(masterKey == null)
+        {
+            masterKey = generateHex((keyLenghts / 32) - 1);
+            try (FileWriter writer = new FileWriter("masterkey.txt")) {
+                writer.write(masterKey);
+            } catch (IOException e) {
+                System.out.println("An error occurred while writing to the file: " + e.getMessage());
+            }
+        }
+        */
 
         int idr = 1;
         String idrString = Integer.toString(idr);
@@ -46,15 +72,15 @@ public class Executable {
         if(keyLenghts == 128) {
             driverKey = hash(masterKey.concat(idrString), "SHA-1");
         }
+        else if(keyLenghts == 192){
+            driverKey = hash(masterKey.concat(idrString), "SHA-224");
+        }
         else if(keyLenghts == 256){
             driverKey = hash(masterKey.concat(idrString), "SHA-256");
         }
         driverKey = driverKey.substring(0, (keyLenghts/4));
         byte[] ATU = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-        String userID = "00000001";
-        String vehicleID = "00000001";
-        char it = 'S';
-        int noe = 50;
+
         SimpleDateFormat formatter = new SimpleDateFormat("yy/MM/dd/HH/mm");
         Date today = new Date();
 
@@ -65,6 +91,9 @@ public class Executable {
         if(keyLenghts == 128){
             hatu = hash(s,"SHA-256");
         }
+        else if(keyLenghts == 192){
+            hatu = hash(s,"SHA-384");
+        }
         else if(keyLenghts == 256){
             hatu = hash(s,"SHA-512");
         }
@@ -72,6 +101,9 @@ public class Executable {
         String userKey = hash(driverKey.concat(hatu),"SHA-1");
         if(keyLenghts == 128){
             userKey = hash(driverKey.concat(hatu),"SHA-1");
+        }
+        else if(keyLenghts == 192){
+            userKey = hash(driverKey.concat(hatu),"SHA-224");
         }
         else if(keyLenghts == 256){
             userKey = hash(driverKey.concat(hatu),"SHA-256");
@@ -115,7 +147,7 @@ public class Executable {
 
             switch (i) {
 
-                case 0:
+                case 1:
 
                 ObuParameters recObuParams = (ObuParameters) objectInputStream.readObject();
                 System.out.println(recObuParams.message);
@@ -126,7 +158,7 @@ public class Executable {
                 }
                     serverSocket.close();
                 break;
-                case 1:
+                case 0:
 
                 AppParameters recAppParams = (AppParameters) objectInputStream.readObject();
                 System.out.println(recAppParams.message);
